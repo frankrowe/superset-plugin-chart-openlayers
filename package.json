@@ -21,7 +21,7 @@
     "ts-types": "tsc --build",
     "test": "jest"
   },
-  "author": "My Name",
+  "author": "Frank Rowe",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"
