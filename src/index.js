@@ -17,7 +17,8 @@
  * under the License.
  */
 // eslint-disable-next-line import/prefer-default-export
-export { default as SupersetPluginChartOpenlayers } from './plugin';
+
+export { default as SupersetPluginChartOpenlayers } from "./plugin";
 /**
  * Note: this file exports the default export from SupersetPluginChartOpenlayers.tsx.
  * If you want to export multiple visualization modules, you will need to

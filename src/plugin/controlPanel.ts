@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, validateNonEmpty } from '@superset-ui/core';
+import { t, validateNonEmpty } from "@superset-ui/core";
 import {
   ControlPanelConfig,
   sections,
   sharedControls,
-} from '@superset-ui/chart-controls';
+} from "@superset-ui/chart-controls";
 
 const config: ControlPanelConfig = {
   /**
@@ -102,22 +102,22 @@ const config: ControlPanelConfig = {
   controlPanelSections: [
     sections.legacyRegularTime,
     {
-      label: t('Query'),
+      label: t("Query"),
       expanded: true,
       controlSetRows: [
         [
           {
-            name: 'cols',
+            name: "cols",
             config: {
               ...sharedControls.groupby,
-              label: t('Columns'),
-              description: t('Columns to group by'),
+              label: t("Columns"),
+              description: t("Columns to group by"),
             },
           },
         ],
         [
           {
-            name: 'metrics',
+            name: "metrics",
             config: {
               ...sharedControls.metrics,
               // it's possible to add validators to controls if
@@ -126,63 +126,77 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        ['adhoc_filters'],
+        ["adhoc_filters"],
         [
           {
-            name: 'row_limit',
+            name: "row_limit",
             config: sharedControls.row_limit,
           },
         ],
       ],
     },
     {
-      label: t('Hello Controls!'),
+      label: t("Hello Controls!"),
       expanded: true,
       controlSetRows: [
         [
           {
-            name: 'header_text',
+            name: "header_text",
             config: {
-              type: 'TextControl',
-              default: 'Hello, World!',
+              type: "TextControl",
+              default: "Openlayers Map",
               renderTrigger: true,
               // ^ this makes it apply instantaneously, without triggering a "run query" button
-              label: t('Header Text'),
-              description: t('The text you want to see in the header'),
+              label: t("Header Text"),
+              description: t("The text you want to see in the header"),
             },
           },
         ],
         [
           {
-            name: 'bold_text',
+            name: "tile_layer_url",
             config: {
-              type: 'CheckboxControl',
-              label: t('Bold Text'),
+              type: "TextControl",
+              default:
+                "http://stamen-tiles-a.a.ssl.fastly.net/watercolor/{x}/{y}/{z}.jpg",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Tile Layer URL"),
+              description: t("The URL of the tile layer you want to use"),
+            },
+          },
+        ],
+        [
+          {
+            name: "bold_text",
+            config: {
+              type: "CheckboxControl",
+              label: t("Bold Text"),
               renderTrigger: true,
               default: true,
-              description: t('A checkbox to make the '),
+              description: t("A checkbox to make the "),
             },
           },
         ],
         [
           {
-            name: 'header_font_size',
+            name: "header_font_size",
             config: {
-              type: 'SelectControl',
-              label: t('Font Size'),
-              default: 'xl',
+              type: "SelectControl",
+              label: t("Font Size"),
+              default: "xl",
               choices: [
                 // [value, label]
-                ['xxs', 'xx-small'],
-                ['xs', 'x-small'],
-                ['s', 'small'],
-                ['m', 'medium'],
-                ['l', 'large'],
-                ['xl', 'x-large'],
-                ['xxl', 'xx-large'],
+                ["xxs", "xx-small"],
+                ["xs", "x-small"],
+                ["s", "small"],
+                ["m", "medium"],
+                ["l", "large"],
+                ["xl", "x-large"],
+                ["xxl", "xx-large"],
               ],
               renderTrigger: true,
-              description: t('The size of your header font'),
+              description: t("The size of your header font"),
             },
           },
         ],

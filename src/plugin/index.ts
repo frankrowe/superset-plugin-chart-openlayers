@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, ChartMetadata, ChartPlugin } from '@superset-ui/core';
-import buildQuery from './buildQuery';
-import controlPanel from './controlPanel';
-import transformProps from './transformProps';
-import thumbnail from '../images/thumbnail.png';
+import { t, ChartMetadata, ChartPlugin } from "@superset-ui/core";
+import buildQuery from "./buildQuery";
+import controlPanel from "./controlPanel";
+import transformProps from "./transformProps";
+import thumbnail from "../images/ol.png";
 
 export default class SupersetPluginChartOpenlayers extends ChartPlugin {
   /**
@@ -35,15 +35,15 @@ export default class SupersetPluginChartOpenlayers extends ChartPlugin {
    */
   constructor() {
     const metadata = new ChartMetadata({
-      description: 'Superset Plugin Chart Openlayers',
-      name: t('Openlayers'),
+      description: "Superset Plugin Chart Openlayers",
+      name: t("Openlayers"),
       thumbnail,
     });
 
     super({
       buildQuery,
       controlPanel,
-      loadChart: () => import('../SupersetPluginChartOpenlayers'),
+      loadChart: () => import("../SupersetPluginChartOpenlayers"),
       metadata,
       transformProps,
     });

@@ -2,7 +2,9 @@
   "name": "superset-plugin-chart-openlayers",
   "version": "0.1.0",
   "description": "Superset Plugin Chart Openlayers",
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "main": "lib/index.js",
   "module": "esm/index.js",
   "files": [
@@ -26,7 +28,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ol": "^7.3.0"
+  },
   "peerDependencies": {
     "@airbnb/config-babel": "^2.0.1",
     "@superset-ui/chart-controls": "*",

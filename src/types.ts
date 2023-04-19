@@ -20,7 +20,7 @@ import {
   QueryFormData,
   supersetTheme,
   TimeseriesDataRecord,
-} from '@superset-ui/core';
+} from "@superset-ui/core";
 
 export interface SupersetPluginChartOpenlayersStylesProps {
   height: number;
@@ -31,14 +31,16 @@ export interface SupersetPluginChartOpenlayersStylesProps {
 
 interface SupersetPluginChartOpenlayersCustomizeProps {
   headerText: string;
+  tileLayerUrl: string;
 }
 
 export type SupersetPluginChartOpenlayersQueryFormData = QueryFormData &
   SupersetPluginChartOpenlayersStylesProps &
   SupersetPluginChartOpenlayersCustomizeProps;
 
-export type SupersetPluginChartOpenlayersProps = SupersetPluginChartOpenlayersStylesProps &
-  SupersetPluginChartOpenlayersCustomizeProps & {
-    data: TimeseriesDataRecord[];
-    // add typing here for the props you pass in from transformProps.ts!
-  };
+export type SupersetPluginChartOpenlayersProps =
+  SupersetPluginChartOpenlayersStylesProps &
+    SupersetPluginChartOpenlayersCustomizeProps & {
+      data: TimeseriesDataRecord[];
+      // add typing here for the props you pass in from transformProps.ts!
+    };
