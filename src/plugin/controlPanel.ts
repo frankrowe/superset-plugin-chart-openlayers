@@ -16,7 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, validateNonEmpty } from "@superset-ui/core";
+import {
+  t,
+  validateNonEmpty,
+  validateInteger,
+  validateNumber,
+} from "@superset-ui/core";
 import {
   ControlPanelConfig,
   sections,
@@ -136,7 +141,7 @@ const config: ControlPanelConfig = {
       ],
     },
     {
-      label: t("Hello Controls!"),
+      label: t("Map Controls"),
       expanded: true,
       controlSetRows: [
         [
@@ -158,7 +163,7 @@ const config: ControlPanelConfig = {
             config: {
               type: "TextControl",
               default:
-                "http://stamen-tiles-a.a.ssl.fastly.net/watercolor/{x}/{y}/{z}.jpg",
+                "http://stamen-tiles-a.a.ssl.fastly.net/watercolor/{y}/{z}/{y}.jpg",
               renderTrigger: false,
               // ^ this makes it apply instantaneously, without triggering a "run query" button
               label: t("Tile Layer URL"),
@@ -168,35 +173,43 @@ const config: ControlPanelConfig = {
         ],
         [
           {
-            name: "bold_text",
+            name: "zoom",
             config: {
-              type: "CheckboxControl",
-              label: t("Bold Text"),
-              renderTrigger: true,
-              default: true,
-              description: t("A checkbox to make the "),
+              type: "TextControl",
+              default: "8",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Zoom"),
+              description: t("The initial zoom level of the map"),
+              validators: [validateInteger],
             },
           },
         ],
         [
           {
-            name: "header_font_size",
+            name: "latitude",
             config: {
-              type: "SelectControl",
-              label: t("Font Size"),
-              default: "xl",
-              choices: [
-                // [value, label]
-                ["xxs", "xx-small"],
-                ["xs", "x-small"],
-                ["s", "small"],
-                ["m", "medium"],
-                ["l", "large"],
-                ["xl", "x-large"],
-                ["xxl", "xx-large"],
-              ],
-              renderTrigger: true,
-              description: t("The size of your header font"),
+              type: "TextControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Latitude"),
+              description: t("The initial latitude of the map"),
+              validators: [validateNumber],
+            },
+          },
+        ],
+        [
+          {
+            name: "longitude",
+            config: {
+              type: "TextControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Longitude"),
+              description: t("The initial longitude of the map"),
+              validators: [validateNumber],
             },
           },
         ],

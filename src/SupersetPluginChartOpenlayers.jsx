@@ -19,9 +19,13 @@
 import React, { useState, useEffect, useRef, createRef } from "react";
 import { styled } from "@superset-ui/core";
 import Map from "ol/Map.js";
-import OSM from "ol/source/OSM.js";
+import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile.js";
 import XYZ from "ol/source/XYZ";
+import VectorLayer from "ol/layer/Vector.js";
+import VectorSource from "ol/source/Vector.js";
+import { Fill, Stroke, Style } from "ol/style.js";
+import { transform } from "ol/proj.js";
 import View from "ol/View.js";
 
 import {
@@ -36,7 +40,7 @@ import {
 // imported from @superset-ui/core. For variables available, please visit
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
-const Styles = styled.div<SupersetPluginChartOpenlayersStylesProps>`
+const Styles = styled.div`
   :root,
   :host {
     --ol-background-color: white;
@@ -423,51 +427,105 @@ const Styles = styled.div<SupersetPluginChartOpenlayersStylesProps>`
  *  * FormData (your controls!) provided as props by transformProps.ts
  */
 
-export default function SupersetPluginChartOpenlayers(
-  props: SupersetPluginChartOpenlayersProps
-) {
+const reader = new GeoJSON({
+  defaultDataProjection: "EPSG:3857",
+  Projection: "EPSG:3857",
+});
+
+const styles = {
+  LineString: new Style({
+    stroke: new Stroke({
+      color: "red",
+      width: 3,
+    }),
+  }),
+  MultiLineString: new Style({
+    stroke: new Stroke({
+      color: "red",
+      width: 3,
+    }),
+  }),
+};
+
+const styleFunction = function (feature) {
+  return styles[feature.getGeometry().getType()];
+};
+
+export default function SupersetPluginChartOpenlayers(props) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
-  const { data, height, width, tileLayerUrl } = props;
-  const [map, setMap] = useState(null);
+  const { data, height, width, tileLayerUrl, zoom, longitude, latitude } =
+    props;
 
-  const rootElem = createRef<HTMLDivElement>();
+  const rootElem = createRef();
   const mapContainer = useRef();
+  const map = useRef();
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    const root = rootElem.current as HTMLElement;
+    const root = rootElem.current;
     console.log("Plugin element", root);
   });
 
   useEffect(() => {
-    console.log("create map");
-    const _map = new Map({
+    console.log("create map", zoom, longitude, latitude);
+    const coordinate = [longitude, latitude];
+    const coordProjected = transform(coordinate, "EPSG:4326", "EPSG:3857");
+    map.current = new Map({
       target: mapContainer.current,
-      layers: [
-        // new TileLayer({
-        //   source: new OSM(),
-        // }),
-      ],
+      layers: [],
       view: new View({
-        center: [0, 0],
-        zoom: 2,
+        center: coordProjected,
+        zoom,
       }),
     });
-    setMap(_map);
   }, []);
 
   useEffect(() => {
-    console.log("tileLayerUrl", tileLayerUrl);
-  }, [tileLayerUrl]);
+    map.current.getView().setZoom(zoom);
+  }, [zoom]);
+
+  useEffect(() => {
+    const coordinate = [longitude, latitude];
+    const coordProjected = transform(coordinate, "EPSG:4326", "EPSG:3857");
+    map.current.getView().setCenter(coordProjected);
+  }, [longitude, latitude]);
 
   console.log("Plugin props!!!", props);
 
-  if (map && tileLayerUrl) {
-    map
+  if (map.current && tileLayerUrl) {
+    map.current
       .getLayers()
       .setAt(0, new TileLayer({ source: new XYZ({ url: tileLayerUrl }) }));
+  }
+
+  if (map.current && data) {
+    const fc = {
+      type: "FeatureCollection",
+      crs: {
+        type: "name",
+        properties: {
+          name: "EPSG:4326",
+        },
+      },
+      features: data.map((d) => JSON.parse(d.geojson)),
+    };
+
+    const features = reader.readFeatures(fc, {
+      dataProjection: "EPSG:4326",
+      featureProjection: "EPSG:3857",
+    });
+
+    const vectorSource = new VectorSource({
+      features,
+    });
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+      style: styleFunction,
+    });
+    //map.getLayers().setAt(1, vectorLayer);
+    map.current.addLayer(vectorLayer);
   }
 
   return (
