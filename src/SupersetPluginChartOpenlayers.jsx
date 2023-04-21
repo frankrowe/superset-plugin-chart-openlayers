@@ -28,11 +28,6 @@ import { Fill, Stroke, Style } from "ol/style.js";
 import { transform } from "ol/proj.js";
 import View from "ol/View.js";
 
-import {
-  SupersetPluginChartOpenlayersProps,
-  SupersetPluginChartOpenlayersStylesProps,
-} from "./types";
-
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
 
@@ -415,7 +410,7 @@ const Styles = styled.div`
   .map-container {
     height: 100%;
     width: 100%;
-    background-color: #ff00ff;
+    background-color: #ffffff;
   }
 `;
 
