@@ -57,10 +57,16 @@ export default function transformProps(chartProps: ChartProps) {
     zoom,
     latitude,
     longitude,
+    fillColorPicker,
+    polygonStrokeColorPicker,
+    polygonStrokeWidth,
+    strokeColorPicker,
+    strokeWidth,
+    circleRadius,
+    circleFillColorPicker,
+    circleStrokeColorPicker,
   } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
-
-  console.log("formData via TransformProps.ts", formData);
 
   return {
     width,
@@ -74,5 +80,13 @@ export default function transformProps(chartProps: ChartProps) {
     zoom,
     latitude,
     longitude,
+    fillColorPicker,
+    polygonStrokeColorPicker,
+    polygonStrokeWidth,
+    strokeColorPicker,
+    strokeWidth,
+    circleRadius,
+    circleFillColorPicker,
+    circleStrokeColorPicker,
   };
 }

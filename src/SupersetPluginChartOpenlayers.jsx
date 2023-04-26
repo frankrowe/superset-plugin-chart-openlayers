@@ -21,10 +21,12 @@ import { styled } from "@superset-ui/core";
 import Map from "ol/Map.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile.js";
+import LayerGroup from "ol/layer/Group.js";
 import XYZ from "ol/source/XYZ";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
-import { Fill, Stroke, Style } from "ol/style.js";
+import { Fill, Stroke, Style, Circle as CircleStyle } from "ol/style.js";
+import Circle from "ol/geom/Circle.js";
 import { transform } from "ol/proj.js";
 import View from "ol/View.js";
 
@@ -427,24 +429,14 @@ const reader = new GeoJSON({
   Projection: "EPSG:3857",
 });
 
-const styles = {
-  LineString: new Style({
-    stroke: new Stroke({
-      color: "red",
-      width: 3,
-    }),
-  }),
-  MultiLineString: new Style({
-    stroke: new Stroke({
-      color: "red",
-      width: 3,
-    }),
-  }),
-};
-
-const styleFunction = function (feature) {
-  return styles[feature.getGeometry().getType()];
-};
+function testIfGeoJSON(data) {
+  try {
+    const geojson = reader.readFeatures(data);
+    return geojson.length > 0;
+  } catch (e) {
+    return false;
+  }
+}
 
 export default function SupersetPluginChartOpenlayers(props) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
@@ -456,20 +448,26 @@ export default function SupersetPluginChartOpenlayers(props) {
   const mapContainer = useRef();
   const map = useRef();
 
-  // Often, you just want to access the DOM and do whatever you want.
-  // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
-    const root = rootElem.current;
-    console.log("Plugin element", root);
-  });
-
-  useEffect(() => {
-    console.log("create map", zoom, longitude, latitude);
+    console.log("mount!!", props);
     const coordinate = [longitude, latitude];
     const coordProjected = transform(coordinate, "EPSG:4326", "EPSG:3857");
     map.current = new Map({
       target: mapContainer.current,
-      layers: [],
+      layers: [
+        new TileLayer({
+          source: new XYZ({ url: tileLayerUrl }),
+          properties: {
+            name: "baseLayer",
+          },
+        }),
+        new LayerGroup({
+          layers: [],
+          properties: {
+            name: "layerGroup",
+          },
+        }),
+      ],
       view: new View({
         center: coordProjected,
         zoom,
@@ -487,41 +485,141 @@ export default function SupersetPluginChartOpenlayers(props) {
     map.current.getView().setCenter(coordProjected);
   }, [longitude, latitude]);
 
-  console.log("Plugin props!!!", props);
+  // console.log("Plugin props!!!", props);
 
-  if (map.current && tileLayerUrl) {
-    map.current
-      .getLayers()
-      .setAt(0, new TileLayer({ source: new XYZ({ url: tileLayerUrl }) }));
-  }
+  useEffect(() => {
+    if (map.current && tileLayerUrl) {
+      const layers = map.current.getLayers();
+      const baseLayer = layers
+        .getArray()
+        .find((l) => l.getProperties().name === "baseLayer");
+      baseLayer.setSource(new XYZ({ url: tileLayerUrl }));
+    }
+  }, [tileLayerUrl]);
 
-  if (map.current && data) {
-    const fc = {
-      type: "FeatureCollection",
-      crs: {
-        type: "name",
-        properties: {
-          name: "EPSG:4326",
-        },
-      },
-      features: data.map((d) => JSON.parse(d.geojson)),
-    };
+  useEffect(() => {
+    if (map.current && data) {
+      const layers = map.current.getLayers();
+      const layerGroup = layers
+        .getArray()
+        .find((l) => l.getProperties().name === "layerGroup");
+      layerGroup.getLayers().clear();
 
-    const features = reader.readFeatures(fc, {
-      dataProjection: "EPSG:4326",
-      featureProjection: "EPSG:3857",
-    });
+      const layerNames = Object.keys(data[0]);
+      layerNames.forEach((layerName) => {
+        const features = data
+          .filter((d) => d[layerName] && testIfGeoJSON(d[layerName]))
+          .map((d) => JSON.parse(d[layerName]));
 
-    const vectorSource = new VectorSource({
-      features,
-    });
-    const vectorLayer = new VectorLayer({
-      source: vectorSource,
-      style: styleFunction,
-    });
-    //map.getLayers().setAt(1, vectorLayer);
-    map.current.addLayer(vectorLayer);
-  }
+        if (!features.length) return;
+
+        const fc = {
+          type: "FeatureCollection",
+          crs: {
+            type: "name",
+            properties: {
+              name: "EPSG:4326",
+            },
+          },
+          features,
+        };
+
+        const vectorFeatures = reader.readFeatures(fc, {
+          dataProjection: "EPSG:4326",
+          featureProjection: "EPSG:3857",
+        });
+
+        const vectorSource = new VectorSource({
+          features: vectorFeatures,
+        });
+
+        const pointStyle = new Style({
+          image: new CircleStyle({
+            radius: props.circleRadius,
+            fill: new Fill({
+              color: props.circleFillColorPicker
+                ? [
+                    props.circleFillColorPicker.r,
+                    props.circleFillColorPicker.g,
+                    props.circleFillColorPicker.b,
+                    props.circleFillColorPicker.a,
+                  ]
+                : "black",
+            }),
+            stroke: new Stroke({
+              color: props.circleStrokeColorPicker
+                ? [
+                    props.circleStrokeColorPicker.r,
+                    props.circleStrokeColorPicker.g,
+                    props.circleStrokeColorPicker.b,
+                    props.circleStrokeColorPicker.a,
+                  ]
+                : "black",
+              width: 1,
+            }),
+          }),
+        });
+        const lineStyle = new Style({
+          stroke: new Stroke({
+            color: props.strokeColorPicker
+              ? [
+                  props.strokeColorPicker.r,
+                  props.strokeColorPicker.g,
+                  props.strokeColorPicker.b,
+                  props.strokeColorPicker.a,
+                ]
+              : "black",
+            width: +props.strokeWidth,
+          }),
+        });
+
+        const polygonStyle = new Style({
+          stroke: new Stroke({
+            color: props.polygonStrokeColorPicker
+              ? [
+                  props.polygonStrokeColorPicker.r,
+                  props.polygonStrokeColorPicker.g,
+                  props.polygonStrokeColorPicker.b,
+                  props.polygonStrokeColorPicker.a,
+                ]
+              : "black",
+            width: +props.polygonStrokeWidth,
+          }),
+          fill: new Fill({
+            color: props.fillColorPicker
+              ? [
+                  props.fillColorPicker.r,
+                  props.fillColorPicker.g,
+                  props.fillColorPicker.b,
+                  props.fillColorPicker.a,
+                ]
+              : "black",
+          }),
+        });
+        const vectorLayer = new VectorLayer({
+          source: vectorSource,
+          style: (f) => {
+            const geometryType = f.getGeometry().getType();
+
+            if (geometryType === "Point" || geometryType === "MultiPoint") {
+              return pointStyle;
+            }
+            if (
+              geometryType === "LineString" ||
+              geometryType === "MultiLineString"
+            ) {
+              return lineStyle;
+            }
+            if (geometryType === "Polygon" || geometryType === "MultiPolygon") {
+              return polygonStyle;
+            }
+          },
+        });
+
+        layerGroup.getLayers().push(vectorLayer);
+      });
+    }
+  }, [data]);
 
   return (
     <Styles

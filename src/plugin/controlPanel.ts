@@ -213,6 +213,113 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: "fill_color_picker",
+            config: {
+              type: "ColorPickerControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Polygon Fill Color"),
+              description: t("The fill color of the polygons"),
+            },
+          },
+        ],
+        [
+          {
+            name: "polygon_stroke_color_picker",
+            config: {
+              type: "ColorPickerControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Polygon Stroke Color"),
+              description: t("The stroke color of the polygons"),
+            },
+          },
+        ],
+        [
+          {
+            name: "polygon_stroke_width",
+            config: {
+              type: "TextControl",
+              default: "1",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Polygon Stroke Width"),
+              description: t("The width used for polygon borders"),
+              validators: [validateNumber],
+            },
+          },
+        ],
+        [
+          {
+            name: "stroke_color_picker",
+            config: {
+              type: "ColorPickerControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Line Color"),
+              description: t("The color used for lines"),
+            },
+          },
+        ],
+        [
+          {
+            name: "stroke_width",
+            config: {
+              type: "TextControl",
+              default: "1",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Line Width"),
+              description: t("The width used for lines"),
+              validators: [validateNumber],
+            },
+          },
+        ],
+        [
+          {
+            name: "circle_fill_color_picker",
+            config: {
+              type: "ColorPickerControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Circle Fill Color"),
+              description: t("The fill color of the circles used for points"),
+            },
+          },
+        ],
+        [
+          {
+            name: "circle_stroke_color_picker",
+            config: {
+              type: "ColorPickerControl",
+              default: "0",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Circle Stroke Color"),
+              description: t("The stroke color of the circles used for points"),
+            },
+          },
+        ],
+        [
+          {
+            name: "circle_radius",
+            config: {
+              type: "TextControl",
+              default: "5",
+              renderTrigger: false,
+              // ^ this makes it apply instantaneously, without triggering a "run query" button
+              label: t("Circle Radius"),
+              description: t("The radius of the circles"),
+              validators: [validateNumber],
+            },
+          },
+        ],
       ],
     },
   ],
