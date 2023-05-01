@@ -45,7 +45,6 @@ const Styles = styled.div`
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     padding: 15px;
     border-radius: 10px;
-    border: 1px solid #cccccc;
     bottom: 12px;
     left: -50px;
     min-width: 280px;
@@ -67,7 +66,6 @@ const Styles = styled.div`
     margin-left: -10px;
   }
   .ol-popup:before {
-    border-top-color: #cccccc;
     border-width: 11px;
     left: 48px;
     margin-left: -11px;
@@ -79,7 +77,7 @@ const Styles = styled.div`
     right: 8px;
   }
   .ol-popup-closer:after {
-    content: "✖";
+    content: "✕";
   }
   :root,
   :host {
