@@ -1,6 +1,6 @@
 {
   "name": "superset-plugin-chart-openlayers",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Superset Plugin Chart Openlayers",
   "sideEffects": [
     "*.css"
