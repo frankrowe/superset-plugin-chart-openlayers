@@ -22,6 +22,7 @@ import Map from "ol/Map.js";
 import GeoJSON from "ol/format/GeoJSON.js";
 import TileLayer from "ol/layer/Tile.js";
 import LayerGroup from "ol/layer/Group.js";
+import Overlay from "ol/Overlay.js";
 import XYZ from "ol/source/XYZ";
 import VectorLayer from "ol/layer/Vector.js";
 import VectorSource from "ol/source/Vector.js";
@@ -38,6 +39,48 @@ import View from "ol/View.js";
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div`
+  .ol-popup {
+    position: absolute;
+    background-color: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #cccccc;
+    bottom: 12px;
+    left: -50px;
+    min-width: 280px;
+  }
+  .ol-popup:after,
+  .ol-popup:before {
+    top: 100%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+  .ol-popup:after {
+    border-top-color: white;
+    border-width: 10px;
+    left: 48px;
+    margin-left: -10px;
+  }
+  .ol-popup:before {
+    border-top-color: #cccccc;
+    border-width: 11px;
+    left: 48px;
+    margin-left: -11px;
+  }
+  .ol-popup-closer {
+    text-decoration: none;
+    position: absolute;
+    top: 2px;
+    right: 8px;
+  }
+  .ol-popup-closer:after {
+    content: "✖";
+  }
   :root,
   :host {
     --ol-background-color: white;
@@ -438,22 +481,59 @@ function testIfGeoJSON(data) {
   }
 }
 
+function Properties(props) {
+  const { properties } = props;
+  if (!properties) {
+    return null;
+  }
+  // render all properties except geometry
+  const filteredProperties = Object.keys(properties)
+    .filter((key) => key !== "geometry")
+    .reduce((obj, key) => {
+      obj[key] = properties[key];
+      return obj;
+    }, {});
+  return (
+    <div>
+      {Object.keys(filteredProperties).map((key) => (
+        <div key={key}>
+          <strong>{key}:</strong> {filteredProperties[key]}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function SupersetPluginChartOpenlayers(props) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
   const { data, height, width, tileLayerUrl, zoom, longitude, latitude } =
     props;
 
+  const [content, setContent] = useState(null);
   const rootElem = createRef();
   const mapContainer = useRef();
   const map = useRef();
+  const overlayContainer = useRef();
+  const overlay = useRef();
 
   useEffect(() => {
     console.log("mount!!", props);
     const coordinate = [longitude, latitude];
     const coordProjected = transform(coordinate, "EPSG:4326", "EPSG:3857");
+
+    overlay.current = new Overlay({
+      element: overlayContainer.current,
+      autoPan: {
+        animation: {
+          duration: 250,
+        },
+      },
+    });
+
     map.current = new Map({
       target: mapContainer.current,
+      overlays: [overlay.current],
       layers: [
         new TileLayer({
           source: new XYZ({ url: tileLayerUrl }),
@@ -472,6 +552,21 @@ export default function SupersetPluginChartOpenlayers(props) {
         center: coordProjected,
         zoom,
       }),
+    });
+
+    map.current.on("singleclick", function (evt) {
+      const feature = map.current.forEachFeatureAtPixel(
+        evt.pixel,
+        function (feature) {
+          return feature;
+        }
+      );
+      if (feature) {
+        const coordinate = evt.coordinate;
+        overlay.current.setPosition(coordinate);
+        const props = feature.getProperties();
+        setContent(props);
+      }
     });
   }, []);
 
@@ -621,6 +716,11 @@ export default function SupersetPluginChartOpenlayers(props) {
     }
   }, [data]);
 
+  function closePopup() {
+    setContent(null);
+    overlay.current.setPosition(undefined);
+  }
+
   return (
     <Styles
       ref={rootElem}
@@ -630,6 +730,17 @@ export default function SupersetPluginChartOpenlayers(props) {
       width={width}
     >
       <h3>{props.headerText}</h3>
+      <div id="popup" class="ol-popup" ref={overlayContainer}>
+        <a
+          href="#"
+          id="popup-closer"
+          class="ol-popup-closer"
+          onClick={closePopup}
+        ></a>
+        <div id="popup-content">
+          <Properties properties={content} />
+        </div>
+      </div>
       <div className="map-container" ref={mapContainer}></div>
     </Styles>
   );

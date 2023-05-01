@@ -11,7 +11,6 @@
     "esm",
     "lib"
   ],
-  "private": true,
   "scripts": {
     "build": "npm run build-cjs && npm run build-esm && npm run ts-types",
     "build-cjs": "babel src --extensions \".ts,.tsx,.js,.jsx\" --copy-files --out-dir lib",
